@@ -13,5 +13,5 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE := jdwpspy
 
-include $(BUILD_HOST_EXECUTABLE)
+#include $(BUILD_HOST_EXECUTABLE)
 
