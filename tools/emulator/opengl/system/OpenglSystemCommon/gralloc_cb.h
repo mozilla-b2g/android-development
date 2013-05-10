@@ -22,7 +22,7 @@
 #include <cutils/native_handle.h>
 
 #define BUFFER_HANDLE_MAGIC ((int)0xabfabfab)
-#define CB_HANDLE_NUM_INTS(nfds) (int)((sizeof(cb_handle_t) - (nfds)*sizeof(int)) / sizeof(int))
+#define CB_HANDLE_NUM_INTS(nfds) (int)(((sizeof(cb_handle_t) - sizeof(native_handle)) - (nfds)*sizeof(int)) / sizeof(int))
 
 //
 // Our buffer handle structure
