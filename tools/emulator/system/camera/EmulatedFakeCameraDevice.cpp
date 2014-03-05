@@ -240,6 +240,10 @@ bool EmulatedFakeCameraDevice::inWorkerThread()
 
 void EmulatedFakeCameraDevice::drawCheckerboard()
 {
+    if (mFrameWidth == 0) {
+        return;
+    }
+
     const int size = mFrameWidth / 10;
     bool black = true;
 
