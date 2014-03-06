@@ -356,7 +356,12 @@ protected:
             inline status_t startThread(bool one_burst)
             {
                 mOneBurst = one_burst;
-                return run(NULL, ANDROID_PRIORITY_URGENT_DISPLAY, 0);
+                status_t rv = run(NULL, ANDROID_PRIORITY_URGENT_DISPLAY, 0);
+                if (rv == INVALID_OPERATION) {
+                    stopThread();
+                    rv = run(NULL, ANDROID_PRIORITY_URGENT_DISPLAY, 0);
+                }
+                return rv;
             }
 
             /* Overriden base class method.
