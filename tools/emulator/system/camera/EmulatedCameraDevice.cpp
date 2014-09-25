@@ -244,22 +244,48 @@ bool EmulatedCameraDevice::inWorkerThread()
 
 status_t EmulatedCameraDevice::WorkerThread::readyToRun()
 {
+    Mutex::Autolock _l(mLock);
     LOGV("Starting emulated camera device worker thread...");
 
     LOGW_IF(mThreadControl >= 0 || mControlFD >= 0,
             "%s: Thread control FDs are opened", __FUNCTION__);
     /* Create a pair of FDs that would be used to control the thread. */
     int thread_fds[2];
+    status_t rv = NO_ERROR;
     if (pipe(thread_fds) == 0) {
         mThreadControl = thread_fds[1];
         mControlFD = thread_fds[0];
         LOGV("Emulated device's worker thread has been started.");
-        return NO_ERROR;
     } else {
         LOGE("%s: Unable to create thread control FDs: %d -> %s",
              __FUNCTION__, errno, strerror(errno));
-        return errno;
+        rv = errno;
     }
+
+    mThreadStartCondition.broadcast();
+
+    return rv;
+}
+
+status_t EmulatedCameraDevice::WorkerThread::startThread(bool one_burst)
+{
+    Mutex::Autolock _l(mLock);
+
+    LOGV("%s", __FUNCTION__);
+    mOneBurst = one_burst;
+    status_t rv = run(NULL, ANDROID_PRIORITY_URGENT_DISPLAY, 0);
+    if (rv == INVALID_OPERATION) {
+        stopThread();
+        rv = run(NULL, ANDROID_PRIORITY_URGENT_DISPLAY, 0);
+    }
+
+    // Wait for thread begins.
+    if (mThreadControl <= 0) {
+        LOGV("Waiting for worker thread...");
+        mThreadStartCondition.wait(mLock);
+    }
+
+    return rv;
 }
 
 status_t EmulatedCameraDevice::WorkerThread::stopThread()
