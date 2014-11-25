@@ -345,6 +345,13 @@ status_t EmulatedCamera::takePicture()
         jpeg_quality = 90;  /* Fall back to default. */
     }
 
+    const bool recording_on = mCallbackNotifier.isVideoRecordingEnabled();
+    if (recording_on) {
+        mCallbackNotifier.setJpegQuality(jpeg_quality);
+        mCallbackNotifier.setTakingPicture(true);
+        return OK;
+    }
+
     /*
      * Make sure preview is not running, and device is stopped before taking
      * picture.
