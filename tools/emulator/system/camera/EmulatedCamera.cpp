@@ -346,6 +346,17 @@ status_t EmulatedCamera::takePicture()
     }
 
     /*
+     * When video recording is on, it causes a deadlock to stop worker thread when
+     * takePicture(). So just call setTakingPicture() here.
+     */
+    const bool recording_on = mCallbackNotifier.isVideoRecordingEnabled();
+    if (recording_on) {
+        mCallbackNotifier.setJpegQuality(jpeg_quality);
+        mCallbackNotifier.setTakingPicture(true);
+        return OK;
+    }
+
+    /*
      * Make sure preview is not running, and device is stopped before taking
      * picture.
      */
