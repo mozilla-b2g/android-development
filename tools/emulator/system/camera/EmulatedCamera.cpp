@@ -345,6 +345,10 @@ status_t EmulatedCamera::takePicture()
         jpeg_quality = 90;  /* Fall back to default. */
     }
 
+    /*
+     * When video recording is on, it causes a deadlock to stop worker thread when
+     * takePicture(). So just call setTakingPicture() here.
+     */
     const bool recording_on = mCallbackNotifier.isVideoRecordingEnabled();
     if (recording_on) {
         mCallbackNotifier.setJpegQuality(jpeg_quality);
